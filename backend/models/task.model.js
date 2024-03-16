@@ -8,8 +8,9 @@ const taskSchema = new Schema({
         type:String,
     },
     status:{
-        type:String,
-        enum:["complete,incomplete"]
+        type: String,
+        enum: ["complete","incomplete"],
+        default: "incomplete",
     },
     archived:{
         type:Boolean,
