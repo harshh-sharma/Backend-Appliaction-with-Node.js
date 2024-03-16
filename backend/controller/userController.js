@@ -2,6 +2,7 @@ import { catchError } from "../middlewares/catchAsyncError.js";
 import ErrorHandler from "../middlewares/error.js"
 import { User } from "../models/userSchema.model.js";
 import cloudinary from "cloudinary";
+import sendJwtToken from "../utlis/jwtToken.js";
 
 const register = catchError(async(req,res,next) => {
     if(!req.files || !Object.keys(req.files) === 0){
@@ -41,11 +42,13 @@ const register = catchError(async(req,res,next) => {
     if(!user){
         next(new ErrorHandler("Something went wrong while registering user",500))
     }
-    res.status(200).json({
-        success:false,
-        message:"User registered successfully",
-        data:user
-    })
+
+    sendJwtToken("User registered successfully",200,user,res);
+    // res.status(200).json({
+    //     success:false,
+    //     message:"User registered successfully",
+    //     data:user
+    // })
 });
 const login = catchError(async(req,res,next) => {
     const {email,password} = req.body;
@@ -62,14 +65,31 @@ const login = catchError(async(req,res,next) => {
     if(!isPasswordMatched){
         return next(new ErrorHandler("Email and password is invalid",400));
     }
-    res.status(200).json({
-        success:false,
-        message:"user successfully login",
-        data:user
+    
+    sendJwtToken("user successfully login",200,user,res);
+    // res.status(200).json({
+    //     success:false,
+    //     message:"user successfully login",
+    //     data:user
+    // })
+});
+const logout = catchError((req,res,next) => {
+    res.status(200).cookie("token","",{expires:new Date(Date.now()),
+    httpOnly:true,}).json({
+        success:true,
+        message:"user successfully logged out"
     })
 });
-const logout = catchError((req,res,next) => {});
-const getUser = catchError((req,res,next) => {});
+const getUser = catchError((req,res,next) => {
+    const user = req.user;
+    if(!user){
+        return ErrorHandler("Internal server error",500);
+    }
+    res.status(200).json({
+        success:true,
+        user
+    });
+});
 
 
 export {

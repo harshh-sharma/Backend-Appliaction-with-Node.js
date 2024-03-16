@@ -55,12 +55,12 @@ userSchema.methods.comparePassword = async function(password){
     return await bcrypt.compare(password,this.password);
 }
 
-userSchema.methods.generateJWTToken = async function(){
+userSchema.methods.generateJWTToken = function(){
     return jwt.sign(
         {_id:this._id},
         process.env.JWT_SECRET_KEY,
         {expiresIn:process.env.JWT_EXPIRES}
-    )
+    );
 }
 
 export const User = mongoose.model("User",userSchema);
