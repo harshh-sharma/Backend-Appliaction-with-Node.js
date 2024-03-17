@@ -1,10 +1,14 @@
+import { Provider } from "react-redux";
+import Body from "./components/Body";
+import appStore from "./utils/appStore";
+import "./index.css"
+import { Toaster } from "react-hot-toast";
+
 function App() {
-
   return (
-   <div>
-      <h1 className="bg-orange-500 text-white">Hello</h1>
-   </div>
-  )
+    <Provider store={appStore}>
+      <Body />
+    </Provider>
+  );
 }
-
-export default App
+export default App;

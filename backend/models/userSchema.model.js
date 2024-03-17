@@ -18,8 +18,7 @@ const userSchema = new Schema({
         validator:[validator.isEmail,"Invalid email,Please provide valid email"]
     },
     phone:{
-        type:Number,
-        required:[true,"Please provide phone number"]
+        type:Number
     },
     password:{
         type:String,

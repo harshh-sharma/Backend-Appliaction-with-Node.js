@@ -6,22 +6,36 @@ import sendJwtToken from "../utlis/jwtToken.js";
 
 const register = catchError(async(req,res,next) => {
     if(!req.files || !Object.keys(req.files) === 0){
-        return next(new ErrorHandler("User avatar is required!!",400));
+        return res.status(400).json({
+            success:false,
+            message:"User avatar is required!!"
+        })
     }
     const {avatar} = req.files;
+    console.log(avatar);
     const allowedFormats = ["image/png","image/jpeg","imgage/webp"];
     if(!allowedFormats.includes(avatar.mimetype)){
-        return next(new ErrorHandler("Please,provide avatar in png,jpeg,webp formats",400));
+        return res.status(400).json({
+            success:false,
+            message:"Please,provide avatar in png,jpeg,webp formats"
+        })
     }
 
-    const {name,email,phone,password} = req.body;
-    if(!name || !email || !phone || !password){
-        return next(new ErrorHandler("All fields are rqeuired",400))
+    const {name,email,password} = req.body;
+    if(!name || !email || !password){
+        return res.status(400).json({
+            success:false,
+            message:"All fields are rqeuired"
+        })
     }
 
     const isUserExit = await User.findOne({email});
     if(isUserExit){
-        return next(new ErrorHandler("user already exists",400));
+        return res.status(400).json({
+            success:false,
+            message:"user already exists"
+        })
+        
     }
 
     const cloudinaryResponse = await cloudinary.v2.uploader.upload(avatar.tempFilePath);
@@ -32,7 +46,6 @@ const register = catchError(async(req,res,next) => {
     const user = await User.create({
         name,
         email,
-        phone,
         password,
         avatar:{
             public_id: cloudinaryResponse.public_id,
@@ -40,7 +53,10 @@ const register = catchError(async(req,res,next) => {
         }
     });
     if(!user){
-        next(new ErrorHandler("Something went wrong while registering user",500))
+        return res.status(500).json({
+            success:false,
+            message:"Something went wrong while registering user"
+        })
     }
 
     sendJwtToken("User registered successfully",200,user,res);
@@ -53,17 +69,26 @@ const register = catchError(async(req,res,next) => {
 const login = catchError(async(req,res,next) => {
     const {email,password} = req.body;
     if(!email || !password){
-        return next(new ErrorHandler("Email and password are required",400));
+        return res.status(400).json({
+            success:false,
+            message:"Email and password are required"
+        })
     }
     
     const user = await User.findOne({email}).select("+password");
     if(!user){
-        return next(new ErrorHandler("Email and password is invaid",400));
+        return res.status(400).json({
+            success:false,
+            message:"Email and password is invaid"
+        })
     }
 
     const isPasswordMatched = await user.comparePassword(password);
     if(!isPasswordMatched){
-        return next(new ErrorHandler("Email and password is invalid",400));
+        return res.status(400).json({
+            success:false,
+            message:"Email and password is invaid"
+        })
     }
     
     sendJwtToken("user successfully login",200,user,res);
@@ -83,7 +108,10 @@ const logout = catchError((req,res,next) => {
 const getUser = catchError((req,res,next) => {
     const user = req.user;
     if(!user){
-        return ErrorHandler("Internal server error",500);
+        return res.status(500).json({
+            success:false,
+            message:"server internal error"
+        })
     }
     res.status(200).json({
         success:true,
